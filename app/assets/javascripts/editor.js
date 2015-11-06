@@ -1119,10 +1119,36 @@ $(function() {
   var initWebsocketConnection = function(url) {
       websocket = new WebSocket('wss://' + window.location.hostname + ':' + window.location.port + url);
       websocket.onopen = function(evt) { resetOutputTab(); }; // todo show some kind of indicator for established connection
-      websocket.onclose = function(evt) { /* expected at some point */ };
-      websocket.onmessage = function(evt) { parseCanvasMessage(evt.data, true); };
+      websocket.onclose = function(evt) {
+        /* expected at some point */
+
+        handleStderrOutputForFlowr(evt);
+        //handleStreamedResponseForCodePilot(evt);
+      };
+      websocket.onmessage = function(evt) {
+        parseCanvasMessage(evt.data, true);
+
+        // probably do this in close...
+        if (qa_api) {
+          handleStreamedResponseForCodePilot(evt)
+        }
+      };
       websocket.onerror = function(evt) { showWebsocketError(); };
       websocket.flush = function() { this.send('\n'); }
+
+    /*var event_source = new EventSource(url);
+     event_source.addEventListener('hint', renderHint);
+     event_source.addEventListener('info', storeContainerInformation);
+
+     if ($('#flowrHint').isPresent()) {
+     event_source.addEventListener('output', handleStderrOutputForFlowr);
+     event_source.addEventListener('close', handleStderrOutputForFlowr);
+     }
+
+     if (qa_api) {
+     event_source.addEventListener('close', handleStreamedResponseForCodePilot);
+     }*/
+
   };
 
   var initTurtle = function() {
