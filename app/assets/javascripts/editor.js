@@ -1130,7 +1130,7 @@ $(function() {
 
         // probably do this in close...
         if (qa_api) {
-          handleStreamedResponseForCodePilot(evt)
+          //handleStreamedResponseForCodePilot(evt)
           qa_api.executeCommand('syncOutput', [evt.data]);
         }
       };
