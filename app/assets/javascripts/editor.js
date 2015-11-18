@@ -1131,6 +1131,7 @@ $(function() {
         // probably do this in close...
         if (qa_api) {
           handleStreamedResponseForCodePilot(evt)
+          qa_api.executeCommand('syncOutput', [evt.data]);
         }
       };
       websocket.onerror = function(evt) { showWebsocketError(); };
