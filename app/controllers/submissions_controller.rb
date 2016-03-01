@@ -113,9 +113,13 @@ class SubmissionsController < ApplicationController
         socket = result[:socket]
         command = result[:command]
 
+        # since websocket_client_simple tries to always call all methods on itself when inside a listener, we need to pass the correct "self"
+        that = self
+
         socket.on :message do |event|
           Rails.logger.info( Time.now.getutc.to_s + ": Docker sending: " + event.data)
-          handle_message(event.data, tubesock)
+          that.handle_message(event.data, tubesock)
+          #handle_message(event.data, tubesock)
         end
 
         socket.on :close do |event|

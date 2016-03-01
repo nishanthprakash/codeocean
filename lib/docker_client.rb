@@ -1,5 +1,8 @@
 require 'concurrent'
 require 'pathname'
+require 'rubygems'
+require 'websocket-client-simple'
+
 
 class DockerClient
   CONTAINER_WORKSPACE_PATH = '/workspace' #'/home/python/workspace' #'/tmp/workspace'
@@ -67,6 +70,7 @@ class DockerClient
   def create_socket(container, stderr=false)
     # todo factor out query params
     # todo separate stderr
+=begin
     query_params = 'logs=0&stream=1&' + (stderr ? 'stderr=1' : 'stdout=1&stdin=1')
 
     # Headers are required by Docker
@@ -85,6 +89,34 @@ class DockerClient
       kill_after_timeout(container)
     end
     socket
+=end
+
+#=begin
+    query_params = 'logs=0&stream=1&' + (stderr ? 'stderr=1' : 'stdout=1&stdin=1')
+
+    # Headers are required by Docker
+    headers = {'Origin' => 'http://localhost'}
+    ws = WebSocket::Client::Simple.connect(DockerClient.config['ws_host'] + '/containers/' + @container.id + '/attach/ws?' + query_params, :headers => headers)
+
+    Rails.logger.info "Tried to create Websocket."
+
+    ws.on :open do
+      Rails.logger.info "websocket-client-simple: Websocket created and open."
+    end
+
+    ws.on :message do |e|
+      Rails.logger.info "Received message: " + e.data
+    end
+
+    ws.on :close do |e|
+      Rails.logger.info "Websocket closed."
+    end
+
+    ws.on :error do |e|
+      Rails.logger.info "Websocket error: " + e.message
+    end
+    ws
+#=end
   end
 
   def copy_file_to_workspace(options = {})
